@@ -2,16 +2,22 @@
 
 package com.popov.dev.notes.presentation.screens
 
+import android.R
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -19,18 +25,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.popov.dev.notes.domain.model.Note
 import com.popov.dev.notes.presentation.ui.theme.Green
+import com.popov.dev.notes.presentation.ui.theme.OtherNotesColors
+import com.popov.dev.notes.presentation.ui.theme.PinnedNotesColors
 import com.popov.dev.notes.presentation.ui.theme.Yellow200
 
 @Composable
@@ -40,30 +50,45 @@ fun NoteScreen(
     val state by viewModel.state.collectAsState()
 
     LazyColumn(
-        //TODO Убрать после
-        modifier = modifier.padding(top = 24.dp, bottom = 24.dp, start = 16.dp, end = 16.dp),
+        //TODO Убрать лишние паддинги после настройки интерфейса
+        modifier = modifier.padding(top = 24.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            Title(text = "All Notes")
+            Title(
+                modifier = modifier.padding(horizontal = 24.dp),
+                text = "All Notes"
+            )
         }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
         item {
             SearchBar(
+                modifier = modifier.padding(horizontal = 24.dp),
                 query = state.query, onQueryChange = {
                     viewModel.processCommand(NotesCommand.InputSearchQuery(it))
                 })
         }
+        item { Spacer(modifier = Modifier.height(24.dp)) }
         item {
-            Subtitle(text = "Pinned")
+
+            Subtitle(
+                modifier = modifier.padding(horizontal = 24.dp),
+                text = "Pinned"
+            )
         }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
         item {
             LazyRow(
                 modifier = modifier
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp)
             ) {
-                items(
-                    items = state.pinedNotes, key = { note -> note.id }) { note ->
+                itemsIndexed(
+                    items = state.pinedNotes,
+                    key = { _, note -> note.id },
+                )
+                { index, note ->
                     NoteCard(
                         note = note, onNoteClick = {
                             viewModel.processCommand(NotesCommand.EditNotes(note))
@@ -74,19 +99,28 @@ fun NoteScreen(
                         onDoubleClick = {
                             viewModel.processCommand(NotesCommand.DeleteNote(note.id))
                         },
-                        backgroundColor = Yellow200
+                        backgroundColor = PinnedNotesColors[index % PinnedNotesColors.size]
                     )
                 }
             }
         }
-        item { Subtitle(text = "Others") }
-        items(
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+        item {
+            Subtitle(
+                modifier = modifier.padding(start = 24.dp, end = 24.dp),
+                text = "Others"
+            )
+        }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+        itemsIndexed(
             items = state.otherNotes,
-            key = { note -> note.id })
-        { note ->
+            key = { _, note -> note.id })
+        { index, note ->
             NoteCard(
+
                 modifier = modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 24.dp),
                 note = note,
                 onNoteClick = {
                     viewModel.processCommand(NotesCommand.EditNotes(note))
@@ -97,8 +131,9 @@ fun NoteScreen(
                 onDoubleClick = {
                     viewModel.processCommand(NotesCommand.DeleteNote(note.id))
                 },
-                backgroundColor = Green
+                backgroundColor = OtherNotesColors[index % OtherNotesColors.size]
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -119,16 +154,19 @@ fun NoteCard(
             .combinedClickable(
                 onClick = { onNoteClick(note) },
                 onLongClick = { onLongClick(note) },
-                onDoubleClick = { onDoubleClick(note) }),
+                onDoubleClick = { onDoubleClick(note) })
+            .padding(16.dp),
     ) {
         Text(
             text = note.title, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface
         )
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = note.updatedAt.toString(),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = note.content,
             fontSize = 16.sp,
@@ -173,22 +211,40 @@ private fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
 ) {
-    TextField(
-        modifier = modifier.fillMaxWidth(),
-        value = query,
-        onValueChange = onQueryChange,
-        placeholder = {
-            Text(
-                text = "Search...",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search, contentDescription = "Search"
-            )
-        },
-        shape = RoundedCornerShape(10.dp)
-    )
+    with(MaterialTheme.colorScheme) {
+        TextField(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(surface)
+                .border(
+                    width = 1.dp,
+                    color = onSurfaceVariant,
+                    shape = RoundedCornerShape(10.dp)
+                ),
+            value = query,
+            onValueChange = onQueryChange,
+            placeholder = {
+                Text(
+                    text = "Search...",
+                    fontSize = 14.sp,
+                    color = onSurfaceVariant
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = onSurface,
+                )
+            },
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = surface,
+                unfocusedTextColor = surface,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
+            shape = RoundedCornerShape(10.dp)
+        )
+    }
+
 }
