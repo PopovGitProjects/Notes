@@ -4,11 +4,11 @@ import com.popov.dev.notes.domain.model.Note
 import kotlinx.coroutines.flow.Flow
 
 interface NoteRepository {
-    fun addNote(title: String, content: String)
-    fun deleteNote(noteId: Int)
-    fun editNote(note: Note)
+    suspend fun addNote(title: String, content: String, isPinned: Boolean, updateAt: Long)
+    suspend fun deleteNote(noteId: Int)
+    suspend fun editNote(note: Note)
     fun getAllNotes(): Flow<List<Note>>
-    fun getNotes(noteId: Int): Note
+    suspend fun getNotes(noteId: Int): Note
     fun searchNote(query: String): Flow<List<Note>>
-    fun switchPinnedStatus(noteId: Int)
+    suspend fun switchPinnedStatus(noteId: Int)
 }

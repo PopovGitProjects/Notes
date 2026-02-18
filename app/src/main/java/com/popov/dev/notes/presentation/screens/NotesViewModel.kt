@@ -1,6 +1,7 @@
 package com.popov.dev.notes.presentation.screens
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.popov.dev.notes.data.TestNoteRepositoryImpl
 import com.popov.dev.notes.domain.model.Note
 import com.popov.dev.notes.domain.usecases.AddNoteUseCase
@@ -26,7 +27,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel : ViewModel() {
     private val repository = TestNoteRepositoryImpl
-
     private val addNoteUseCase = AddNoteUseCase(repository)
     private val editNoteUseCase = EditNoteUseCase(repository)
     private val getNoteUseCase = GetNoteUseCase(repository)
@@ -39,8 +39,6 @@ class NotesViewModel : ViewModel() {
     val state = _state.asStateFlow()
 
     private val query = MutableStateFlow("")
-
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
         addSomeNotes()
@@ -58,37 +56,40 @@ class NotesViewModel : ViewModel() {
                 val otherNotes = notes.filter { !it.isPinned }
                 _state.update { it.copy(pinedNotes = pinedNotes, otherNotes = otherNotes) }
             }
-            .launchIn(scope)
+            .launchIn(viewModelScope)
     }
 
     // TODO: Удалить после проведения проверки добавления заметок
     private fun addSomeNotes() {
-        repeat(10_000) {
-            addNoteUseCase(title = "Title#$it", content = "Content#$it")
+        viewModelScope.launch {
+            repeat(10_000) {
+                addNoteUseCase(title = "Title#$it", content = "Content#$it")
+            }
         }
     }
 
     fun processCommand(command: NotesCommand) {
-        when (command) {
-            is NotesCommand.DeleteNote -> {
-                deleteNoteUseCase(command.noteId)
-            }
+        viewModelScope.launch {
+            when (command) {
+                is NotesCommand.DeleteNote -> {
+                    deleteNoteUseCase(command.noteId)
+                }
 
-            is NotesCommand.EditNotes -> {
-                val note = getNoteUseCase(command.note.id)
-                val title = command.note.title
-                editNoteUseCase(note.copy(title = "$title + edited"))
-            }
+                is NotesCommand.EditNotes -> {
+                    val note = getNoteUseCase(command.note.id)
+                    val title = command.note.title
+                    editNoteUseCase(note.copy(title = "$title + edited"))
+                }
 
-            is NotesCommand.SwitchPinedStatus -> {
-                switchPinnedStatusUseCase(command.noteId)
-            }
+                is NotesCommand.SwitchPinedStatus -> {
+                    switchPinnedStatusUseCase(command.noteId)
+                }
 
-            is NotesCommand.InputSearchQuery -> {
-                query.update { command.query.trim() }
+                is NotesCommand.InputSearchQuery -> {
+                    query.update { command.query.trim() }
+                }
             }
         }
-
     }
 }
 
