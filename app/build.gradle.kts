@@ -4,6 +4,7 @@ plugins {
     // Но если возникнет ошибка компиляции, раскомментируйте строку ниже:
     // alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -58,8 +59,14 @@ dependencies {
     dependencies {
         implementation(libs.androidx.lifecycle.viewmodel.compose)
     }
+    implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
 
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)

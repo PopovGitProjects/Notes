@@ -27,6 +27,7 @@ pluginManagement {
         // Зеркало для плагинов (Aliyun - очень стабильное)
         maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
         maven { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://common-repo.maven.yandex.net/") }
 
         // Стандартные репозитории как запасные
         google()
@@ -46,7 +47,7 @@ dependencyResolutionManagement {
         maven { url = uri("https://maven.aliyun.com/repository/public") }
 
         // Яндекс (если есть специфические библиотеки, иногда работает быстрее)
-        // maven { url = uri("https://common-repo.maven.yandex.net/") }
+        maven { url = uri("https://common-repo.maven.yandex.net/") }
 
         google()
         mavenCentral()
