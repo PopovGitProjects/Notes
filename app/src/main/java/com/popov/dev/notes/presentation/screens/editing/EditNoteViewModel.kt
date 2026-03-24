@@ -1,8 +1,9 @@
 package com.popov.dev.notes.presentation.screens.editing
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.popov.dev.notes.data.TestNoteRepositoryImpl
+import com.popov.dev.notes.data.NoteRepositoryImpl
 import com.popov.dev.notes.domain.model.Note
 import com.popov.dev.notes.domain.usecases.DeleteNoteUseCase
 import com.popov.dev.notes.domain.usecases.EditNoteUseCase
@@ -12,8 +13,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class EditNoteViewModel(private val noteId: Int) : ViewModel() {
-    private val repository = TestNoteRepositoryImpl
+class EditNoteViewModel(private val noteId: Int, context: Context) : ViewModel() {
+    private val repository = NoteRepositoryImpl.getInstance(context)
     private val editNoteUseCase = EditNoteUseCase(repository)
     val getNoteUseCase = GetNoteUseCase(repository)
     val deleteNoteUseCase = DeleteNoteUseCase(repository)

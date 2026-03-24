@@ -1,8 +1,9 @@
 package com.popov.dev.notes.presentation.screens.notes
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.popov.dev.notes.data.TestNoteRepositoryImpl
+import com.popov.dev.notes.data.NoteRepositoryImpl
 import com.popov.dev.notes.domain.model.Note
 import com.popov.dev.notes.domain.usecases.GetAllNotesUseCase
 import com.popov.dev.notes.domain.usecases.SearchNoteUseCase
@@ -17,8 +18,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class NotesViewModel : ViewModel() {
-    private val repository = TestNoteRepositoryImpl
+class NotesViewModel(context: Context) : ViewModel() {
+    private val repository = NoteRepositoryImpl.getInstance(context)
     private val getAllNotesUseCase = GetAllNotesUseCase(repository)
     private val searchNoteUseCase = SearchNoteUseCase(repository)
     private val switchPinnedStatusUseCase = SwitchPinnedStatusUseCase(repository)
